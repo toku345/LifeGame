@@ -1,18 +1,23 @@
+# -*- coding: utf-8 -*-
+# 座標クラス
 class Geometry
 
-  # generate coordinate[y, x]
+  #座標[y,x]の生成
   def Geometry.[](y, x)
     new(y, x)
   end
 
+  # 初期化
   def initialize(y, x)
     @y = y
     @x = x
   end
 
+  # x, yのアクセサ
   attr_accessor :y
   attr_accessor :x
 
+  # 加法
   def +(other)
     case other
     when Geometry
@@ -20,10 +25,11 @@ class Geometry
     when Array
       Geometry[@y + other[0], @x + other[1]]
     else
-      raise TypeError, "wrong argument type #{other.type} (expected Geometry or Array)"
+      raise TypeError, "wrong argument type #{other.class} (expected Geometry or Array)"
     end
   end
 
+  # 減法
   def -(other)
     case other
     when Geometry
@@ -31,24 +37,29 @@ class Geometry
     when Array
       Geometry[@y - other[0], @x - other[1]]
     else
-      raise TypeError, "wrong argument type #{other.type} (expected Geometry or Array)"
+      raise TypeError, "wrong argument type #{other.class} (expected Geometry or Array)"
     end
   end
 
+  # 比較
   def ==(other)
-    type == other.type and @x == other.x and @y == other.y
+    self.class == other.class and @x == other.x and @y == other.y
   end
 
+  # ハッシュ関数
   def hash
     @x.hash ^ @y.hash
   end
 
+  # ハッシュ比較関数
   alias eql? ==
 
+  # 文字列化
   def to_s
     format("%d@%d", @y, @x)
   end
 
+  # インスペクト
   def inspect
     format("#<%d@%d>", @y, @x)
   end
