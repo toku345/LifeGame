@@ -73,8 +73,8 @@ class LifeGame
 
   # 生きている生物全部のイテレータ
   def each_life
-    @lives.each_key {|geom|
-      yield geom
+    @lives.each_pair {|geom, val|
+      yield geom unless val.nil?
     }
   end
 

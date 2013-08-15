@@ -9,6 +9,7 @@ class TkLifeGame
   def initialize(width = 80, height = 80, rectsize = 6)
     @lifegame = LifeGame.new(width, height)
     @rectsize = rectsize
+    @goflag = false
 
     # メインのWindow生成
     @canvas = TkCanvas.new(nil,
@@ -18,20 +19,60 @@ class TkLifeGame
                            'relief' => 'sunken')
 
     # [next]ボタン生成
-    @nextbutton = TkButton.new(nil, 'text' => 'next')
+    @nextbutton = TkButton.new(nil,
+                               'text' => 'next',
+                               'command' => proc {@lifegame.nextgen; display})
 
     # [go/stop]ボタン生成
-    @gobutton = TkButton.new(nil, 'text' => 'go')
+    @gobutton = TkButton.new(nil,
+                             'text' => 'go',
+                             'command' => proc {
+                               @goflag = !@goflag
+                               if @goflag
+                                 @gobutton.text = 'stop'
+                                 go
+                               else
+                                 @gobutton.text = 'go'
+                               end
+                             })
 
     # [quit]ボタン生成
-    @quitbutton = TkButton.new(nil, 'text' => 'quit')
+    @quitbutton = TkButton.new(nil,
+                               'text' => 'quit',
+                               'command' => proc {exit})
     @canvas.pack
     @nextbutton.pack('side' => 'left')
     @gobutton.pack('side' => 'left')
-    @quitbutton.pack('side' => 'left')
+    @quitbutton.pack('side' => 'right')
 
     @prevgrid = {}
     @rectangles = {}
+
+    # マウスボタンを押した時の処理
+    @canvas.bind '1', proc {|x, y|
+      geom = Geometry[y / @rectsize, x / @rectsize]
+      if @lifegame.live?(geom)
+        @lifegame.kill(geom)
+      else
+        @lifegame.born(geom)
+      end
+      display
+      update
+    }, '%x %y'
+
+    # アフターイベント
+    @after = TkAfter.new
+    @after.set_start_proc(0, proc {go})
+  end
+
+  # メインループ
+  def go
+    @lifegame.nextgen
+    display
+    update
+    if @goflag
+      @after.restart
+    end
   end
 
   # 実行
@@ -69,7 +110,8 @@ class TkLifeGame
 
   # 点の消失
   def resetrect(geom)
-    @rectangles[geom].destroy
+# p @rectangles if @rectangles[geom].nil?
+    @rectangles[geom].destroy unless @rectangles[geom].nil?
     @rectangles[geom] = nil
   end
 end
